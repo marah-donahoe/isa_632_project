@@ -4,7 +4,9 @@ import requests
 # -------------------------
 # CONFIG
 # -------------------------
-
+DATABRICKS_URL = st.secrets["DATABRICKS_URL"]
+ENDPOINT_NAME = st.secrets["ENDPOINT_NAME"]
+TOKEN = st.secrets["TOKEN"]
 # -------------------------
 # UI
 # -------------------------
