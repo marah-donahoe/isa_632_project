@@ -319,7 +319,7 @@ with tab1:
         # -------------------------
         # DISPLAY CHAT HISTORY
         # -------------------------
-      for message in reversed(st.session_state.messages):
+        for message in reversed(st.session_state.messages):
 
             if message["role"] == "user":
 
