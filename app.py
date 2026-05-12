@@ -215,7 +215,7 @@ def parse_playlist(text):
 
     # extract songs
     song_matches = re.findall(
-        r"\d+\.\s*(.*?)\s*[-:]\s*(.*)",
+        r"(?:\d+[\.\)]\s*)(.*?)\s*[-:]\s*(.+)",
         text
     )
 
@@ -309,8 +309,12 @@ with tab1:
 
             Every song should fit the requested vibe and energy.
             Avoid songs that do not fit the mood.
-            You MUST return EXACTLY {num_songs} songs.
-            Do not return more or fewer.
+            You MUST return EXACTLY {num_songs} UNIQUE songs.
+
+            Do not stop early.
+            Do not repeat songs.
+            Do not return fewer than {num_songs}.
+            Continue until all {num_songs} songs are listed.
             User Request: {user_input}
 
             OUTPUT FORMAT (ONLY IF ARTIST EXISTS):
@@ -385,6 +389,11 @@ with tab1:
                     playlist_title, songs = parse_playlist(
                         message["content"]
                     )
+
+                    if len(songs) < num_songs:
+                        st.warning(
+                            f"Only found {len(songs)} songs out of requested {num_songs}."
+                        )
 
                     st.markdown(
                         f'<div class="playlist-title">{playlist_title}</div>',
