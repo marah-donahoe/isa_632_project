@@ -276,10 +276,14 @@ with tab1:
         with st.form("playlist_form"):
 
             user_input = st.text_area(
-                "Describe your playlist",
+                "Describe your playlist vibe, artist, or theme",
                 value=default_prompt,
                 placeholder="e.g., sad hip hop vibes or songs like Lauryn Hill",
                 height=120
+            )
+
+            st.caption(
+                "Playlist length is controlled in Playlist Settings."
             )
 
             generate = st.form_submit_button(
@@ -297,6 +301,10 @@ with tab1:
             TASK:
             Generate EXACTLY {num_songs} songs.
 
+            The playlist MUST contain exactly {num_songs} songs.
+            Never generate fewer than {num_songs}.
+            Never generate more than {num_songs}.
+
             REQUIREMENTS:
             - Every song must match the mood: {mood}
             - Every song must match the user request
@@ -309,6 +317,10 @@ with tab1:
             - Do NOT include notes
             - Do NOT include the prompt
             - Do NOT include markdown
+            - Only recommend real songs
+            - Only recommend real artists
+            - Do NOT invent songs
+            - Do NOT invent artists
 
             OUTPUT FORMAT:
 
@@ -352,6 +364,8 @@ with tab1:
                 }
             ]
 
+            user_input = user_input.strip()
+            
             response = get_playlist(model_input)
 
             loading_placeholder.empty()
@@ -397,7 +411,7 @@ with tab1:
 
                     if len(songs) < requested_num_songs:
                         st.warning(
-                            f"Only found {len(songs)} songs out of requested {requested_num_songs}."
+                            f"Generated {len(songs)} of {requested_num_songs} requested songs."
                         )
 
                     st.markdown(
