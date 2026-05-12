@@ -202,8 +202,9 @@ def parse_playlist(text):
 
     # extract songs
     song_matches = re.findall(
-        r"\d+[\.\)]\s*\"?(.*?)\"?\s*[-–:]\s*(.*)",
-        text
+        r"^\s*\d+\.\s*(.*?)\s*-\s*(.*)$",
+        text,
+        re.MULTILINE
     )
 
     songs = []
@@ -286,11 +287,14 @@ with tab1:
 
         if generate and user_input:
 
+            user_input = user_input.strip()
+            requested_songs = extract_num_songs(user_input)
+
             full_prompt = f"""
             You are a playlist generation engine.
 
             TASK:
-            Generate up to {num_songs} songs.
+            Generate up to {requested_songs} songs.
 
             REQUIREMENTS:
             - The USER REQUEST defines the primary constraint (artist, genre, seed songs)
@@ -301,7 +305,7 @@ with tab1:
             - Do NOT invent songs
             - Do NOT invent artists
             - Only recommend songs that exist in the available dataset context
-            - If fewer than {num_songs} matching songs are available,
+            - If fewer than {requested_songs} matching songs are available,
             return only the matching songs that exist
             - Do NOT include explanations
             - Do NOT include commentary
@@ -375,13 +379,9 @@ with tab1:
                 }
             ]
 
-            user_input = user_input.strip()
-
             response = get_playlist(model_input)
 
             loading_placeholder.empty()
-
-            requested_songs = extract_num_songs(user_input)
 
             st.session_state.messages.append({
                 "role": "assistant",
@@ -407,7 +407,7 @@ with tab1:
             elif message["role"] == "assistant":
 
                 # 🚨 ADD THIS CHECK FIRST (BEFORE PARSING)
-                if "NO_SONGS_FOUND" in message["content"]:
+                if "no songs by this artist exist in the dataset" in message["content"]:
                     with st.chat_message("assistant"):
                         st.warning("No songs found for this artist in dataset")
                     continue
