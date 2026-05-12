@@ -106,22 +106,6 @@ with st.sidebar:
 
     st.header("Playlist Settings")
 
-    mood = st.selectbox(
-        "Mood",
-        [
-            "Any",
-            "Chill",
-            "Sad",
-            "Energetic",
-            "Romantic",
-            "Late Night",
-            "Dreamy",
-            "Aggressive",
-            "Nostalgic",
-            "Happy"
-        ]
-    )
-
     num_songs = st.slider(
         "Number of Songs",
         min_value=5,
@@ -287,7 +271,7 @@ with tab1:
             )
 
             st.caption(
-                "Playlist length is controlled in Playlist Settings."
+                "Playlist length is controlled in settings."
             )
 
             generate = st.form_submit_button(
@@ -307,9 +291,6 @@ with tab1:
 
             REQUIREMENTS:
             - The USER REQUEST defines the primary constraint (artist, genre, seed songs)
-            - The MOOD is a secondary constraint used to filter or select songs within that constraint
-            - If there is a conflict, prioritize USER REQUEST first, then adjust selection to best match mood
-            - If the user requests a specific artist (e.g., "ABBA songs"), only include songs from that artist, but choose the most mood-aligned songs available from that artist.
             - All songs must be UNIQUE
             - Do NOT repeat songs
             - Only recommend real songs
