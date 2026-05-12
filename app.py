@@ -194,11 +194,18 @@ def parse_playlist(text):
     if "not available" in text.lower() or "no response" in text.lower():
         return playlist_title, []
 
-    # extract title safely
-    title_match = re.search(r"(?:Playlist Title|Playlist|Title)\s*[:\-]?\s*(.*)", text, re.IGNORECASE)
+    # extract title safely (robust version)
+    title_match = re.search(
+        r"(playlist title|playlist|title)\s*[:\-]?\s*\*?\*?\s*(.+)",
+        text,
+        re.IGNORECASE
+    )
 
     if title_match:
-        extracted_title = title_match.group(1).strip()
+        extracted_title = title_match.group(2).strip()
+
+        # clean markdown noise
+        extracted_title = re.sub(r"\*+", "", extracted_title).strip()
 
         if extracted_title and len(extracted_title) < 80:
             playlist_title = extracted_title
