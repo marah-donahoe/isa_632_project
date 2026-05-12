@@ -236,42 +236,42 @@ with tab1:
 
     with left_col:
 
-    st.markdown("### Enter a Prompt")
+        st.markdown("### Enter a Prompt")
 
-    default_prompt = st.session_state.get("selected_prompt", "")
+        default_prompt = st.session_state.get("selected_prompt", "")
 
-    # -------------------------
-    # CTRL + ENTER SUPPORT (JS)
-    # -------------------------
-    st.components.v1.html("""
-    <script>
-    document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.key === 'Enter') {
-            const btn = window.parent.document.querySelector('button[kind="formSubmit"]');
-            if (btn) {
-                btn.click();
+        # -------------------------
+        # CTRL + ENTER SUPPORT (JS)
+        # -------------------------
+        st.components.v1.html("""
+        <script>
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const btn = window.parent.document.querySelector('button[kind="formSubmit"]');
+                if (btn) {
+                    btn.click();
+                }
             }
-        }
-    });
-    </script>
-    """, height=0)
+        });
+        </script>
+        """, height=0)
 
-    # -------------------------
-    # FORM (handles Enter key)
-    # -------------------------
-    with st.form("playlist_form"):
+        # -------------------------
+        # FORM (handles Enter key)
+        # -------------------------
+        with st.form("playlist_form"):
 
-        user_input = st.text_area(
-            "Describe your playlist",
-            value=default_prompt,
-            placeholder="e.g., sad hip hop vibes or songs like Lauryn Hill",
-            height=120
-        )
+            user_input = st.text_area(
+                "Describe your playlist",
+                value=default_prompt,
+                placeholder="e.g., sad hip hop vibes or songs like Lauryn Hill",
+                height=120
+            )
 
-        generate = st.form_submit_button(
-            "Generate Playlist",
-            use_container_width=True
-        )
+            generate = st.form_submit_button(
+                "Generate Playlist",
+                use_container_width=True
+            )
 
     with right_col:
 
