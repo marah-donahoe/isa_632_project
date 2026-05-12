@@ -4,6 +4,8 @@ import re
 import random
 import time
 
+DEFAULT_NUM_SONGS = 10
+
 # -------------------------
 # PAGE CONFIG
 # -------------------------
@@ -103,17 +105,6 @@ st.markdown(
 # SIDEBAR
 # -------------------------
 with st.sidebar:
-
-    st.header("Playlist Settings")
-
-    num_songs = st.slider(
-        "Number of Songs",
-        min_value=5,
-        max_value=25,
-        value=10
-    )
-
-    st.divider()
 
     st.subheader("Prompt Ideas")
 
@@ -233,10 +224,13 @@ def parse_playlist(text):
                     "artist": artist
                 })
 
-    if not playlist_title:
-        playlist_title = "Custom Playlist"
-
     return playlist_title, songs
+
+def extract_num_songs(user_input: str):
+    match = re.search(r"\b(\d+)\s*songs?\b", user_input.lower())
+    if match:
+        return int(match.group(1))
+    return DEFAULT_NUM_SONGS
 
 # -------------------------
 # GENERATOR TAB
@@ -387,15 +381,17 @@ with tab1:
 
             loading_placeholder.empty()
 
+            requested_songs = extract_num_songs(user_input)
+
             st.session_state.messages.append({
                 "role": "assistant",
                 "content": response,
-                "num_songs": num_songs
+                "num_songs": requested_songs
             })
 
             st.session_state.playlist_history.append({
                 "content": response,
-                "num_songs": num_songs
+                "num_songs": requested_songs
             })
 
         # -------------------------
@@ -431,10 +427,16 @@ with tab1:
                             f"Generated {len(songs)} of {requested_num_songs} requested songs."
                         )
 
-                    st.markdown(
-                        f'<div class="playlist-title">{playlist_title}</div>',
-                        unsafe_allow_html=True
-                    )
+                    if playlist_title:
+                        st.markdown(
+                            f'<div class="playlist-title">{playlist_title}</div>',
+                            unsafe_allow_html=True
+                        )
+                    else:
+                        st.markdown(
+                            '<div class="playlist-title">Generated Playlist</div>',
+                            unsafe_allow_html=True
+                        )
 
                     if not songs:
 
