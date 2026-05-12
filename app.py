@@ -234,7 +234,7 @@ with tab1:
 
     left_col, right_col = st.columns([1, 2])
 
-    wwith left_col:
+    with left_col:
 
     st.markdown("### Enter a Prompt")
 
