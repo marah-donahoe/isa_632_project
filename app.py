@@ -201,7 +201,7 @@ def get_playlist(messages):
 # -------------------------
 def parse_playlist(text):
 
-    playlist_title = "Generated Playlist"
+    playlist_title = "Custom Playlist"
 
     if not text:
         return playlist_title, []
@@ -213,7 +213,11 @@ def parse_playlist(text):
     # extract title safely
     title_match = re.search(r"Playlist Title:\s*(.*)", text)
     if title_match:
-        playlist_title = title_match.group(1).strip()
+
+        extracted_title = title_match.group(1).strip()
+
+        if extracted_title:
+            playlist_title = extracted_title
 
     # extract songs
     song_matches = re.findall(
@@ -302,8 +306,10 @@ with tab1:
             Generate up to {num_songs} songs.
 
             REQUIREMENTS:
-            - Every song must match the mood: {mood}
-            - Every song must match the user request
+            - The USER REQUEST defines the primary constraint (artist, genre, seed songs)
+            - The MOOD is a secondary constraint used to filter or select songs within that constraint
+            - If there is a conflict, prioritize USER REQUEST first, then adjust selection to best match mood
+            - If the user requests a specific artist (e.g., "ABBA songs"), only include songs from that artist, but choose the most mood-aligned songs available from that artist.
             - All songs must be UNIQUE
             - Do NOT repeat songs
             - Only recommend real songs
