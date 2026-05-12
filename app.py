@@ -166,7 +166,7 @@ def get_playlist(messages):
     }
 
     payload = {
-        "input": messages
+        "messages": messages
     }
 
     response = requests.post(
@@ -283,18 +283,27 @@ with tab1:
 
         if generate and user_input:
 
-            full_prompt = (
-                f"You are a music recommendation system.\n\n"
-                f"Return ONLY a playlist in this format:\n\n"
-                f"Playlist Title: <title>\n\n"
-                f"1. Song Title : Artist\n"
-                f"2. Song Title : Artist\n"
-                f"...\n\n"
-                f"If you cannot generate a playlist, respond ONLY: NOT AVAILABLE\n\n"
-                f"Mood: {mood}\n"
-                f"Number of Songs: {num_songs}\n"
-                f"User Request: {user_input}"
-            )
+            full_prompt = f"""
+            You are a strict music recommendation engine.
+
+            IMPORTANT RULES:
+            - Do NOT repeat the user request
+            - Do NOT include instructions
+            - Do NOT include "Mood", "Number of Songs", or "User Request" in output
+            - Only output the playlist
+
+            INPUTS:
+            Mood: {mood}
+            Number of Songs: {num_songs}
+            User Request: {user_input}
+
+            OUTPUT FORMAT:
+            Playlist Title: <title>
+
+            1. Song Title : Artist
+            2. Song Title : Artist
+            ...
+            """
 
             st.session_state.messages.append({
                 "role": "user",
@@ -317,8 +326,12 @@ with tab1:
 
             model_input = [
                 {
-                    "role": "user",
+                    "role": "system",
                     "content": full_prompt
+                },
+                {
+                    "role": "user",
+                    "content": user_input
                 }
             ]
 
@@ -358,8 +371,8 @@ with tab1:
 
                     if not songs:
 
-                        st.warning("⚠️ No structured playlist found. Showing raw response below:")
-                        st.write(message["content"])
+                        st.warning("⚠️ No structured playlist found")#. Showing raw response below:")
+                        # st.write(message["content"])
 
                     else:
 
