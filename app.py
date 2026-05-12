@@ -1,62 +1,3 @@
-# import streamlit as st
-# import requests
-
-# # -------------------------
-# # CONFIG
-# # -------------------------
-# DATABRICKS_URL = st.secrets["DATABRICKS_URL"]
-# TOKEN = st.secrets["TOKEN"]
-# ENDPOINT_NAME = st.secrets["ENDPOINT_NAME"]
-# # -------------------------
-# # UI
-# # -------------------------
-# st.title("🎵 AI Playlist Generator")
-
-# user_input = st.text_input(
-#     "Enter a song, artist, or vibe:",
-#     placeholder="e.g., Lauryn Hill or sad hip hop vibes"
-# )
-
-# # -------------------------
-# # CALL ENDPOINT
-# # -------------------------
-# def get_playlist(prompt):
-#     url = f"{DATABRICKS_URL}/serving-endpoints/{ENDPOINT_NAME}/invocations"
-
-#     headers = {
-#         "Authorization": f"Bearer {TOKEN}",
-#         "Content-Type": "application/json"
-#     }
-
-#     payload = {
-#         "input": [
-#             {"role": "user", "content": prompt}
-#         ]
-#     }
-
-#     response = requests.post(url, headers=headers, json=payload)
-
-#     if response.status_code != 200:
-#         return f"Error: {response.text}"
-
-#     data = response.json()
-
-#     try:
-#         return data["output"][0]["content"][0]["text"]
-#     except:
-#         return str(data)
-
-# # -------------------------
-# # BUTTON
-# # -------------------------
-# if st.button("Generate Playlist"):
-#     if user_input:
-#         with st.spinner("Creating your playlist..."):
-#             result = get_playlist(user_input)
-#             st.text_area("Your Playlist", result, height=300)
-#     else:
-#         st.warning("Please enter a prompt.")
-
 import streamlit as st
 import requests
 import re
@@ -293,11 +234,32 @@ with tab1:
 
     left_col, right_col = st.columns([1, 2])
 
-    with left_col:
+    wwith left_col:
 
-        st.markdown("### Enter a Prompt")
+    st.markdown("### Enter a Prompt")
 
-        default_prompt = st.session_state.get("selected_prompt", "")
+    default_prompt = st.session_state.get("selected_prompt", "")
+
+    # -------------------------
+    # CTRL + ENTER SUPPORT (JS)
+    # -------------------------
+    st.components.v1.html("""
+    <script>
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') {
+            const btn = window.parent.document.querySelector('button[kind="formSubmit"]');
+            if (btn) {
+                btn.click();
+            }
+        }
+    });
+    </script>
+    """, height=0)
+
+    # -------------------------
+    # FORM (handles Enter key)
+    # -------------------------
+    with st.form("playlist_form"):
 
         user_input = st.text_area(
             "Describe your playlist",
@@ -306,7 +268,7 @@ with tab1:
             height=120
         )
 
-        generate = st.button(
+        generate = st.form_submit_button(
             "Generate Playlist",
             use_container_width=True
         )
@@ -315,11 +277,14 @@ with tab1:
 
         if generate and user_input:
 
-            full_prompt = f"""
-            Mood: {mood}
-            Generate {num_songs} songs.
-            User Request: {user_input}
-            """
+            full_prompt = (
+                f"🎧 Playlist Request\n\n"
+                f"🎵 Mood: {mood}\n"
+                f"🔢 Number of Songs: {num_songs}\n\n"
+                f"📝 User Request:\n{user_input}\n\n"
+                f"---\n"
+                f"Return a playlist with title and songs in order."
+            )
 
             st.session_state.messages.append({
                 "role": "user",
@@ -354,7 +319,7 @@ with tab1:
         # -------------------------
         # DISPLAY CHAT HISTORY
         # -------------------------
-        for message in st.session_state.messages:
+      for message in reversed(st.session_state.messages):
 
             if message["role"] == "user":
 
