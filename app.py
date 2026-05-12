@@ -166,7 +166,7 @@ def get_playlist(messages):
     }
 
     payload = {
-        "messages": messages
+        "input": messages
     }
 
     response = requests.post(
