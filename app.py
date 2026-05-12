@@ -196,23 +196,29 @@ def parse_playlist(text):
 
     # extract title safely (robust version)
     title_match = re.search(
-        r"(playlist title|playlist|title)\s*[:\-]?\s*\*?\*?\s*(.+)",
+        r"playlist title\s*[:\-]\s*(.+)",
         text,
         re.IGNORECASE
     )
 
-    if title_match:
-        extracted_title = title_match.group(2).strip()
+    if not title_match:
+        # fallback: first line heuristic
+        first_line = text.strip().split("\n")[0]
 
-        # clean markdown noise
+        if len(first_line) < 80 and not first_line[0].isdigit():
+            playlist_title = first_line.strip()
+
+    if title_match:
+        extracted_title = title_match.group(1).strip()
+
         extracted_title = re.sub(r"\*+", "", extracted_title).strip()
 
-        if extracted_title and len(extracted_title) < 80:
+        if extracted_title:
             playlist_title = extracted_title
 
     # extract songs
     song_matches = re.findall(
-        r"(?:^|\n)\s*\d+[\.\)]\s*(.*?)\s*[-:]\s*(.*)",
+        r"\d+[\.\)]\s*\"?(.*?)\"?\s*[-–:]\s*(.*)",
         text
     )
 
@@ -233,6 +239,9 @@ def parse_playlist(text):
                     "title": title,
                     "artist": artist
                 })
+
+    if playlist_title is None or playlist_title.strip() == "":
+        playlist_title = "Custom Playlist"
 
     return playlist_title, songs
 
@@ -325,6 +334,15 @@ with tab1:
                 "No songs by this artist exist in the dataset"
             - Do NOT substitute similar artists
             - Do NOT generate stylistic replacements
+
+            - You MUST ALWAYS generate a specific playlist title.
+            - NEVER output "Custom Playlist" or generic titles.
+
+            Examples of good titles:
+            - Sad Taylor Swift Ballads
+            - Midnight Breakup Drive
+            - Soft Acoustic Heartbreak
+            - Late Night Emotional Pop
 
             OUTPUT FORMAT:
 
