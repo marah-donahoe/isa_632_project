@@ -298,7 +298,7 @@ with tab1:
 
             st.session_state.messages.append({
                 "role": "user",
-                "content": full_prompt
+                "content": user_input
             })
 
             loading_messages = [
@@ -315,7 +315,14 @@ with tab1:
                 loading_placeholder.info(random.choice(loading_messages))
                 time.sleep(0.5)
 
-            response = get_playlist(st.session_state.messages)
+            model_input = [
+                {
+                    "role": "user",
+                    "content": full_prompt
+                }
+            ]
+
+            response = get_playlist(model_input)
 
             loading_placeholder.empty()
 
