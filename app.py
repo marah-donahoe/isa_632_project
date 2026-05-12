@@ -166,7 +166,9 @@ def get_playlist(messages):
     }
 
     payload = {
-        "input": messages
+        "input": messages,
+        "temperature": 0.7,
+        "max_output_tokens": 1200
     }
 
     response = requests.post(
@@ -215,7 +217,7 @@ def parse_playlist(text):
 
     # extract songs
     song_matches = re.findall(
-        r"(?:\d+[\.\)]\s*)(.*?)\s*[-:]\s*(.+)",
+        r"(?:^|\n)\s*\d+[\.\)]\s*(.*?)\s*[-:]\s*(.*)",
         text
     )
 
@@ -236,9 +238,6 @@ def parse_playlist(text):
                     "title": title,
                     "artist": artist
                 })
-
-    # limit AFTER parsing
-    songs = songs[:num_songs]
 
     return playlist_title, songs
 
@@ -293,36 +292,34 @@ with tab1:
         if generate and user_input:
 
             full_prompt = f"""
-            You are a strict music recommendation system.
+            You are a playlist generation engine.
 
-            RULES:
-            - Only use artists that are known or provided by the system
-            - If the requested artist is unknown, respond ONLY:
-            "<artist name> NOT FOUND"
-            - Do NOT generate substitute artists
-            - Do NOT generate fallback playlists
-            - Do NOT guess
-            - Do NOT hallucinate
+            TASK:
+            Generate EXACTLY {num_songs} songs.
 
-            INPUTS:
-            The playlist MUST strongly match this mood: {mood}
+            REQUIREMENTS:
+            - Every song must match the mood: {mood}
+            - Every song must match the user request
+            - All songs must be UNIQUE
+            - Do NOT repeat songs
+            - Do NOT stop early
+            - Continue until EXACTLY {num_songs} songs are generated
+            - Do NOT include explanations
+            - Do NOT include commentary
+            - Do NOT include notes
+            - Do NOT include the prompt
+            - Do NOT include markdown
 
-            Every song should fit the requested vibe and energy.
-            Avoid songs that do not fit the mood.
-            You MUST return EXACTLY {num_songs} UNIQUE songs.
+            OUTPUT FORMAT:
 
-            Do not stop early.
-            Do not repeat songs.
-            Do not return fewer than {num_songs}.
-            Continue until all {num_songs} songs are listed.
-            User Request: {user_input}
-
-            OUTPUT FORMAT (ONLY IF ARTIST EXISTS):
-            Playlist Title: <title>
+            Playlist Title: <playlist name>
 
             1. Song - Artist
             2. Song - Artist
-            ...
+            3. Song - Artist
+
+            USER REQUEST:
+            {user_input}
             """
 
             st.session_state.messages.append({
@@ -361,10 +358,14 @@ with tab1:
 
             st.session_state.messages.append({
                 "role": "assistant",
-                "content": response
+                "content": response,
+                "num_songs": num_songs
             })
 
-            st.session_state.playlist_history.append(response)
+            st.session_state.playlist_history.append({
+                "content": response,
+                "num_songs": num_songs
+            })
 
         # -------------------------
         # DISPLAY CHAT HISTORY
@@ -390,9 +391,13 @@ with tab1:
                         message["content"]
                     )
 
-                    if len(songs) < num_songs:
+                    songs = songs[:message.get("num_songs", 10)]
+
+                    requested_num_songs = message.get("num_songs", 10)
+
+                    if len(songs) < requested_num_songs:
                         st.warning(
-                            f"Only found {len(songs)} songs out of requested {num_songs}."
+                            f"Only found {len(songs)} songs out of requested {requested_num_songs}."
                         )
 
                     st.markdown(
@@ -435,16 +440,26 @@ with tab2:
 
     else:
 
-        for idx, playlist in enumerate(
+        for idx, playlist_data in enumerate(
             reversed(st.session_state.playlist_history)
         ):
 
+            playlist = playlist_data["content"]
+            saved_num_songs = playlist_data["num_songs"]
+
             playlist_title, songs = parse_playlist(playlist)
+
+            songs = songs[:saved_num_songs]
 
             with st.expander(
                 f"{playlist_title}",
                 expanded=False
             ):
+
+                if len(songs) < saved_num_songs:
+                    st.warning(
+                        f"Only found {len(songs)} songs out of requested {saved_num_songs}."
+                    )
 
                 if songs:
 
