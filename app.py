@@ -168,7 +168,7 @@ def get_playlist(messages):
     payload = {
         "input": messages,
         "temperature": 0.7,
-        "max_output_tokens": 1200
+        "max_output_tokens": 4000
     }
 
     response = requests.post(
@@ -299,28 +299,25 @@ with tab1:
             You are a playlist generation engine.
 
             TASK:
-            Generate EXACTLY {num_songs} songs.
-
-            The playlist MUST contain exactly {num_songs} songs.
-            Never generate fewer than {num_songs}.
-            Never generate more than {num_songs}.
+            Generate up to {num_songs} songs.
 
             REQUIREMENTS:
             - Every song must match the mood: {mood}
             - Every song must match the user request
             - All songs must be UNIQUE
             - Do NOT repeat songs
-            - Do NOT stop early
-            - Continue until EXACTLY {num_songs} songs are generated
+            - Only recommend real songs
+            - Only recommend real artists
+            - Do NOT invent songs
+            - Do NOT invent artists
+            - Only recommend songs that exist in the available dataset context
+            - If fewer than {num_songs} matching songs are available,
+            return only the matching songs that exist
             - Do NOT include explanations
             - Do NOT include commentary
             - Do NOT include notes
             - Do NOT include the prompt
             - Do NOT include markdown
-            - Only recommend real songs
-            - Only recommend real artists
-            - Do NOT invent songs
-            - Do NOT invent artists
 
             OUTPUT FORMAT:
 
@@ -365,7 +362,7 @@ with tab1:
             ]
 
             user_input = user_input.strip()
-            
+
             response = get_playlist(model_input)
 
             loading_placeholder.empty()
