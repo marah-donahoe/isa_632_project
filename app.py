@@ -195,12 +195,12 @@ def parse_playlist(text):
         return playlist_title, []
 
     # extract title safely
-    title_match = re.search(r"Playlist Title:\s*(.*)", text)
-    if title_match:
+    title_match = re.search(r"(?:Playlist Title|Playlist|Title)\s*[:\-]?\s*(.*)", text, re.IGNORECASE)
 
+    if title_match:
         extracted_title = title_match.group(1).strip()
 
-        if extracted_title:
+        if extracted_title and len(extracted_title) < 80:
             playlist_title = extracted_title
 
     # extract songs
@@ -305,10 +305,25 @@ with tab1:
             - Do NOT include notes
             - Do NOT include the prompt
             - Do NOT include markdown
+            - Do NOT change the label "Playlist Title:"
+            - You must only use songs that appear in the retrieved dataset context.
+            - Do not use external knowledge.
+            - Do not rely on memory of real-world music catalogs.
+
+            If the user requests songs by a specific artist:
+
+            - You MUST ONLY return songs by that exact artist
+            - If no songs by that artist exist in retrieved dataset context:
+                - Return exactly:
+                "No songs by this artist exist in the dataset"
+            - Do NOT substitute similar artists
+            - Do NOT generate stylistic replacements
 
             OUTPUT FORMAT:
 
-            Playlist Title: <playlist name>
+            Playlist Title MUST appear exactly in this format:
+
+            Playlist Title: <title>
 
             1. Song - Artist
             2. Song - Artist
