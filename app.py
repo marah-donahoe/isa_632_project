@@ -273,10 +273,6 @@ with tab1:
                 height=120
             )
 
-            st.caption(
-                "Playlist length is controlled in settings."
-            )
-
             generate = st.form_submit_button(
                 "Generate Playlist",
                 use_container_width=True
