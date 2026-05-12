@@ -201,29 +201,35 @@ def parse_playlist(text):
 
     playlist_title = "Generated Playlist"
 
-    title_match = re.search(
-        r"Playlist Title:\s*(.*)",
-        text
-    )
+    if not text:
+        return playlist_title, []
 
+    # handle failure case explicitly
+    if "not available" in text.lower() or "no response" in text.lower():
+        return playlist_title, []
+
+    # extract title safely
+    title_match = re.search(r"Playlist Title:\s*(.*)", text)
     if title_match:
         playlist_title = title_match.group(1).strip()
 
+    # extract songs
+    song_matches = re.findall(r"\d+\.\s*(.*?)\s*:\s*(.*)", text)
+
     songs = []
 
-    song_matches = re.findall(
-        r"\d+\.\s*(.*?)\s*:\s*(.*)",
-        text
-    )
-
     for match in song_matches:
-        title = match[0].strip()
-        artist = match[1].strip()
+        if len(match) == 2:
+            title, artist = match
 
-        songs.append({
-            "title": title,
-            "artist": artist
-        })
+            title = title.strip()
+            artist = artist.strip()
+
+            if title and artist:
+                songs.append({
+                    "title": title,
+                    "artist": artist
+                })
 
     return playlist_title, songs
 
@@ -278,12 +284,16 @@ with tab1:
         if generate and user_input:
 
             full_prompt = (
-                f"🎧 Playlist Request\n\n"
-                f"🎵 Mood: {mood}\n"
-                f"🔢 Number of Songs: {num_songs}\n\n"
-                f"📝 User Request:\n{user_input}\n\n"
-                f"---\n"
-                f"Return a playlist with title and songs in order."
+                f"You are a music recommendation system.\n\n"
+                f"Return ONLY a playlist in this format:\n\n"
+                f"Playlist Title: <title>\n\n"
+                f"1. Song Title : Artist\n"
+                f"2. Song Title : Artist\n"
+                f"...\n\n"
+                f"If you cannot generate a playlist, respond ONLY: NOT AVAILABLE\n\n"
+                f"Mood: {mood}\n"
+                f"Number of Songs: {num_songs}\n"
+                f"User Request: {user_input}"
             )
 
             st.session_state.messages.append({
@@ -339,28 +349,28 @@ with tab1:
                         unsafe_allow_html=True
                     )
 
-                    if songs:
+                    if not songs:
+
+                        st.warning("⚠️ No structured playlist found. Showing raw response below:")
+                        st.write(message["content"])
+
+                    else:
 
                         for i, song in enumerate(songs):
 
-                            with st.container():
-
-                                st.markdown(
-                                    f"""
-                                    <div class="song-card">
-                                        <div class="song-title">
-                                            {i+1}. {song['title']}
-                                        </div>
-                                        <div class="song-artist">
-                                            {song['artist']}
-                                        </div>
+                            st.markdown(
+                                f"""
+                                <div class="song-card">
+                                    <div class="song-title">
+                                        {i+1}. {song['title']}
                                     </div>
-                                    """,
-                                    unsafe_allow_html=True
-                                )
-
-                    else:
-                        st.write(message["content"])
+                                    <div class="song-artist">
+                                        {song['artist']}
+                                    </div>
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
 
 # -------------------------
 # HISTORY TAB
