@@ -106,7 +106,7 @@ st.markdown(
 # -------------------------
 with st.sidebar:
 
-    st.subheader("Prompt Ideas")
+    st.header("Prompt Ideas")
 
     example_prompts = [
         "late night r&b vibes",
@@ -202,9 +202,8 @@ def parse_playlist(text):
 
     # extract songs
     song_matches = re.findall(
-        r"^\s*\d+\.\s*(.*?)\s*-\s*(.*)$",
-        text,
-        re.MULTILINE
+        r"\d+[\.\)]\s*\"?(.*?)\"?\s*[-–:]\s*(.*)",
+        text
     )
 
     songs = []
