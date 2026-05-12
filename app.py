@@ -225,6 +225,8 @@ def parse_playlist(text):
             title = title.strip()
             artist = artist.strip()
 
+            songs = songs[:num_songs]
+
             if title and artist:
                 songs.append({
                     "title": title,
@@ -296,8 +298,10 @@ with tab1:
             - Do NOT hallucinate
 
             INPUTS:
-            Mood: {mood}
-            Number of Songs: {num_songs}
+            Mood constraint (must follow strictly): {mood}
+            All songs must match this mood.
+            You MUST return EXACTLY {num_songs} songs.
+            Do not return more or fewer.
             User Request: {user_input}
 
             OUTPUT FORMAT (ONLY IF ARTIST EXISTS):
