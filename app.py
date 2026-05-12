@@ -284,24 +284,27 @@ with tab1:
         if generate and user_input:
 
             full_prompt = f"""
-            You are a strict music recommendation engine.
+            You are a strict music recommendation system.
 
-            IMPORTANT RULES:
-            - Do NOT repeat the user request
-            - Do NOT include instructions
-            - Do NOT include "Mood", "Number of Songs", or "User Request" in output
-            - Only output the playlist
+            RULES:
+            - Only use artists that are known or provided by the system
+            - If the requested artist is unknown, respond ONLY:
+            "<artist name> NOT FOUND"
+            - Do NOT generate substitute artists
+            - Do NOT generate fallback playlists
+            - Do NOT guess
+            - Do NOT hallucinate
 
             INPUTS:
             Mood: {mood}
             Number of Songs: {num_songs}
             User Request: {user_input}
 
-            OUTPUT FORMAT:
+            OUTPUT FORMAT (ONLY IF ARTIST EXISTS):
             Playlist Title: <title>
 
-            1. Song Title : Artist
-            2. Song Title : Artist
+            1. Song - Artist
+            2. Song - Artist
             ...
             """
 
@@ -357,6 +360,12 @@ with tab1:
                     st.write(message["content"])
 
             elif message["role"] == "assistant":
+
+                # 🚨 HANDLE "NOT FOUND" CASE FIRST
+                if "not found" in message["content"].lower():
+                    with st.chat_message("assistant"):
+                        st.warning(message["content"])
+                    continue
 
                 with st.chat_message("assistant"):
 
