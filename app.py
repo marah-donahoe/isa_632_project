@@ -214,24 +214,31 @@ def parse_playlist(text):
         playlist_title = title_match.group(1).strip()
 
     # extract songs
-    song_matches = re.findall(r"\d+\.\s*(.*?)\s*:\s*(.*)", text)
+    song_matches = re.findall(
+        r"\d+\.\s*(.*?)\s*[-:]\s*(.*)",
+        text
+    )
 
     songs = []
 
     for match in song_matches:
+
         if len(match) == 2:
+
             title, artist = match
 
             title = title.strip()
             artist = artist.strip()
 
-            songs = songs[:num_songs]
-
             if title and artist:
+
                 songs.append({
                     "title": title,
                     "artist": artist
                 })
+
+    # limit AFTER parsing
+    songs = songs[:num_songs]
 
     return playlist_title, songs
 
@@ -298,8 +305,10 @@ with tab1:
             - Do NOT hallucinate
 
             INPUTS:
-            Mood constraint (must follow strictly): {mood}
-            All songs must match this mood.
+            The playlist MUST strongly match this mood: {mood}
+
+            Every song should fit the requested vibe and energy.
+            Avoid songs that do not fit the mood.
             You MUST return EXACTLY {num_songs} songs.
             Do not return more or fewer.
             User Request: {user_input}
