@@ -185,7 +185,7 @@ def get_playlist(messages):
 # -------------------------
 def parse_playlist(text):
 
-    playlist_title = "Custom Playlist"
+    playlist_title = None
 
     if not text:
         return playlist_title, []
@@ -200,13 +200,6 @@ def parse_playlist(text):
         text,
         re.IGNORECASE
     )
-
-    if not title_match:
-        # fallback: first line heuristic
-        first_line = text.strip().split("\n")[0]
-
-        if len(first_line) < 80 and not first_line[0].isdigit():
-            playlist_title = first_line.strip()
 
     if title_match:
         extracted_title = title_match.group(1).strip()
@@ -240,7 +233,7 @@ def parse_playlist(text):
                     "artist": artist
                 })
 
-    if playlist_title is None or playlist_title.strip() == "":
+    if not playlist_title:
         playlist_title = "Custom Playlist"
 
     return playlist_title, songs
@@ -417,10 +410,10 @@ with tab1:
 
             elif message["role"] == "assistant":
 
-                # 🚨 HANDLE "NOT FOUND" CASE FIRST
-                if "not found" in message["content"].lower():
+                # 🚨 ADD THIS CHECK FIRST (BEFORE PARSING)
+                if "NO_SONGS_FOUND" in message["content"]:
                     with st.chat_message("assistant"):
-                        st.warning(message["content"])
+                        st.warning("No songs found for this artist in dataset")
                     continue
 
                 with st.chat_message("assistant"):
